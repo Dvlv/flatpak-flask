@@ -1,0 +1,43 @@
+app-id: co.uk.dvlv.Flsk
+runtime: org.gnome.Platform
+runtime-version: '42'
+sdk: org.gnome.Sdk
+finish-args:
+  - --share=network
+command: runner.sh
+modules:
+  - name: pip-requirements
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    build-commands:
+      - cp r.txt /app/r.txt
+      - pip3 install --prefix=${FLATPAK_DEST} --no-build-isolation -r /app/r.txt
+    sources:
+      - type: file
+        path: r.txt
+
+  - name: runner
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --filesystem=host
+    build-commands:
+      - install -D runner.sh /app/bin/runner.sh
+      - install -D main.py /app/main.py
+      - cp -r models /app/models
+      - install -D database.db /var/home/Dvlv/.var/lib/co.uk.dvlv.Flsk/data/database.db
+    ensure-writable:
+      - /app
+      - /app/models
+    sources:
+      - type: file
+        path: main.py
+      - type: file
+        path: runner.sh
+      - type: file
+        path: database.db
+      - type: dir
+        path: models/
+        dest: models/
